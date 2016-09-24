@@ -23,7 +23,7 @@
 
 # ### Imports and Loading the Data 
 
-# In[2]:
+# In[1]:
 
 # Imports
 import pandas as pd
@@ -35,16 +35,18 @@ import seaborn as sns
 get_ipython().magic('matplotlib inline')
 fig_prefix = '../figures/2015-09-20-as-titanic-explo-lab-'
 
+plt.rcParams['font.size'] = 14.0   
 
-# In[3]:
+
+# In[2]:
 
 # Getting the titanic data
 titanic_df = pd.read_csv('../data/titanic_data.csv')
 
 
-# ### Some information about the data.
+# ### Some information about the data
 
-# In[4]:
+# In[3]:
 
 # Some information about the data
 titanic_df.info()
@@ -52,7 +54,7 @@ titanic_df.info()
 
 # >**Note: **From here we can see that there are about **891 entries** with a total of **12 columns**. The data types for each column can be observed as well. The variable descriptions as obtained from Kaggle is showed from this text file *[data_descriptions.txt](../data/data_descriptions.txt)*.
 
-# In[5]:
+# In[4]:
 
 # Looking at some entries of the data
 titanic_df.head(6)
@@ -64,7 +66,7 @@ titanic_df.head(6)
 # ### Cleaning the `Pclass`, `Sex`, and `Embarked` Columns
 # For the `Pclass` column, I would put the respective socio-economic status value for each numeric value. *(1= Upper Class, 2 = Middle Class, 3 = Lower Class)*. Meanwhile, for the `Sex` column, I would just capitalize each word of the gender. And finally, for the `Embarked` column, I would put the respective embark locations *(C = Cherbourg; Q = Queenstown; S = Southampton)*.
 
-# In[6]:
+# In[5]:
 
 # Functions to clean data
 def clean_pclass(df_col):
@@ -89,43 +91,21 @@ def clean_data(df):
     return df
 
 
-# In[7]:
+# In[6]:
 
 titanic_df = clean_data(titanic_df)
 
 
-# In[8]:
+# In[7]:
 
 # Looking at the data
 titanic_df.head()
 
 
-# > **Note: **We can see that the changes have reflected in the data frame.
+# > **Note: **We can see that the changes have reflected in the data frame but the `Age` and `Cabin` column still have some missing values.
 
-# ## 1.3 Data Exploration
-# 
-# To start with the exploration, I am going to start off with the basic details that the data has to offer.
-
-# ### Counting the Total Male and Female Passengers
-
-# In[30]:
-
-def count_entries(df, col_arr):
-    tmp_df = pd.DataFrame()
-    for name in col_arr:
-        surv = len(df[df['Survived']==1][name])
-        not_surv
-        tmp_df[name] = 
-    return ser
-
-
-# In[38]:
-
-titanic_df.groupby(['Sex', 'Survived'], as_index=False).count()
-
-
-# ### Counting the NaN/null Entries by Column
-# Upon looking at the data, I observed that some rows have no entries under the Age and Cabin column. In order to explore the data even further, I looked at each column and check the number of NaN entries in that column.
+# ### Counting the NaN Entries by Column
+# Upon looking at the data, I observed that some rows have no entries under the Age and Cabin column. Is there other columns with missing values? In order to explore the data even further, I looked at each column and check the number of NaN entries in that column.
 
 # In[10]:
 
@@ -133,23 +113,15 @@ titanic_df.groupby(['Sex', 'Survived'], as_index=False).count()
 titanic_df.isnull().sum()
 
 
-# > **Note: **It can be observed that only the `Age` and `Cabin` columns have missing values. I would later go into this.
+# > **Note: **It can be seen that only the `Age` and `Cabin` column have missing values.
+
+# ### Filling the Missing Values
 
 # Remember that the `Age` and `Cabin` columns have some `NaN` or missing values in some of its rows. Upon reading some online resources, I found out that there are options on how to deal with these rows. 
 # 
-# First option is by dropping the rows that have no entries under the `Age` and `Cabin` column, but after observing that a large number of rows have no entries under the respective columns, it would greatly affect my dataset if I were to drop these rows. 
+# First option is by dropping the rows that have no entries under the `Age` and `Cabin` column, but after observing that a large number of rows have no entries under the respective columns, it would greatly affect my dataset if I were to drop these rows. Hence my second option, using some information from rows with values under the `Age` and `Cabin` columns, I would predict the missing values of these columns.
 # 
-# Hence my second option, using some basic tools to predict the values of `Age` and `Cabin` columns based on other rows' value.
-
-# ### Filling-up the `Age` Column
-# Since the Age column has the least number of blank entries, I decided to fill this column first. In filling up the missing age, I could have gotten the median age by sex, and just subtitute this median age for every missing value based on the sex of that row. But, I have observed from the data that the title of names (i.e. Mr, Ms, Master, etc.) could also have something to do with age, especially that the title `Master` seemed to be associated with children. Hence, I decided to use these title, in order to predict or fill the missing age.
-
-#     Scratch: Thinking of just finding the median age by sex and putting the median age on the missing values. BUT! Why not try extracting the title of the name (i.e. Mr., Mrs, etc) and then find the median age based on the sex and the title.
-#     
-#     Steps:
-#     1. Split surname by using , as delimiter
-#     2. Create a list of titles from the data
-#     3. Unify these titles
+# In filling up the missing age, I could have gotten the median age by sex, and just subtitute this median age for every missing value based on the sex of that row. But, I have observed from the data that the title of names (i.e. Mr, Ms, Master, etc.) could also have something to do with age, especially that the title `Master` seemed to be associated with children. Hence, I decided to use these title, in order to predict or fill the missing age.
 
 # ### Splitting the `Name` Column
 # Using the `Name` column of the data frame, I would split the passenger's name and add three additional columns: `Title`, `Firstname`, `Surname` the name's title, first name, and surname, respectively.
@@ -177,12 +149,6 @@ s_surname = s_surname.rename('Surname')
 
 # Adding the name sections to the data frame
 titanic_df = titanic_df.join([s_title, s_firstname, s_surname])
-
-
-# In[13]:
-
-# Confirming that the columns have been added
-titanic_df.head()
 
 
 # ### Organizing the `Title` Column
@@ -223,9 +189,17 @@ def unify_title(df):
 titanic_df['UniTitle'] = titanic_df['Title'].apply(unify_title)
 
 
+# In[13]:
+
+# Confirming that the columns have been added
+titanic_df.head()
+
+
 # ### Filling the Missing Ages
 
 # In filling up the missing ages, I wouldn't want to modify the original data, hence I would make a new column `Filled Age` that would contain all passenger's age. Also, since the mean is greatly affected by outliers in the data set, I created a boxplot of `Ages` by `Title`, in order to see the presence of outliers.
+
+# #### Looking for outliers in the Age of each Unified Title
 
 # In[18]:
 
@@ -245,9 +219,11 @@ fig.savefig(fig_prefix+'box_plot_ages_by_title')
 
 # > **Note: **Since there are some outliers, the mean `Age` for the `Titles`: `Mr` and `Miss`, would be affected. Hence, I decided to use the median instead.
 
+# #### Creating and filling the `Filled Age` column
+
 # In[19]:
 
-# A DataFrame that contains the median age for each title
+# Creating a series that contains the median age for each title
 median_age_by_title = titanic_df.groupby('UniTitle').median().round(2)['Age']
 median_age_by_title
 
@@ -266,8 +242,10 @@ for i in range(len(titanic_df)):
 # In[21]:
 
 # Looking at the new data frame
-titanic_df[['Age', 'UniTitle', 'Filled Age']].head(6)
+titanic_df[titanic_df['Age'].isnull()][['Age', 'UniTitle', 'Filled Age']].head()
 
+
+# > **Note: ** We could see that for every NaN values, we have successfully filled it based on the person's title
 
 # In[22]:
 
@@ -307,12 +285,57 @@ print (titanic_df[titanic_df['Age'].isnull()]['Sex']=='Female').sum() # Number o
 # 
 # In this part, I would go further into the analysis of factors that could have affected a person's survivability in the Titanic incident.
 
+# ## 1.3 Data Exploration
+# 
+# To start with the exploration, I am going to start off with the basic details that the data has to offer.
+
+# ### How many female passengers and male passengers survived?
+
+# In[8]:
+
+grouped_by_sex_survival = pd.DataFrame(titanic_df.groupby(['Sex', 'Survived'], as_index=True).count()['PassengerId'])
+grouped_by_sex_survival.columns = ['Count']
+grouped_by_sex_survival.index.set_levels(['Not Survived', 'Survived'], level=1, inplace=True)
+grouped_by_sex_survival
+
+
+# In[83]:
+
+fig = plt.figure(figsize=(14,6))
+ax1 = fig.add_subplot(121)
+ax2 = fig.add_subplot(122)
+
+# Plotting
+grouped_by_sex_survival.ix['Female'].plot.pie(subplots=True, fontsize=14, ax=ax1, autopct='%.0f%%')
+grouped_by_sex_survival.ix['Male'].plot.pie(subplots=True, fontsize=14, ax=ax2, autopct='%.0f%%', startangle=-100)
+
+# Plot Customization
+fig.suptitle('Survivability in each Sex', fontsize=16)
+ax1.set_xlabel('Female', fontsize=15)
+ax1.yaxis.set_visible(False)
+ax2.set_xlabel('Male', fontsize=15)
+ax2.yaxis.set_visible(False)
+
+fig.savefig(fig_prefix+'pie_survival_each_gender')
+
+
 # ## 2.1 Data Visualization
+
+# In[71]:
+
+def plot_customize(ax, title, xlabel, ylabel):
+    ax.tick_params(labelsize=12)
+    ax.set_xlabel(xlabel, fontsize=13)
+    ax.set_ylabel(ylabel, fontsize=13)
+    ax.set_title(title, fontsize=14)
+    
+    return ax
+
 
 # ### Survivability by Sex
 # As per reports, most of the 700 survivors of Titanic are female, and children. I wanted to confirm this by looking into visualizations of the data.
 
-# In[24]:
+# In[68]:
 
 # Looking into survivability by sex
 fig = plt.figure(figsize=(6,6))
@@ -320,11 +343,7 @@ ax = fig.add_subplot(111)
 ax = sns.barplot(x='Sex', y='Survived', data=titanic_df, estimator=np.sum, ci=0)
 
 # Plot Customizations
-ax.tick_params(labelsize=12)
-ax.set_xlabel('Sex', fontsize=13)
-ax.set_ylabel('No. of Survivors', fontsize=13)
-ax.set_title('Survivability by Sex', fontsize=14)
-
+plot_customize(ax, 'Survivability by Sex', 'Sex', 'Distribution', )
 fig.savefig(fig_prefix+'survivability_by_sex')
 
 
@@ -333,7 +352,7 @@ fig.savefig(fig_prefix+'survivability_by_sex')
 # ### Survivability by Class
 # Looking at a passenger's socio-economic status and survivability.
 
-# In[25]:
+# In[72]:
 
 # Looking into survivability by Class
 fig = plt.figure(figsize=(6,6))
@@ -342,11 +361,7 @@ ax = sns.barplot(x='Pclass', y='Survived', data=titanic_df, estimator=np.sum, ci
                  order=['Upper Class', 'Middle Class', 'Lower Class'])
 
 # Plot Customizations
-ax.tick_params(labelsize=12)
-ax.set_xlabel('Socio-Economic Status', fontsize=13)
-ax.set_ylabel('No. of Survivors', fontsize=13)
-ax.set_title('Survivability by Class', fontsize=14)
-
+plot_customize(ax, 'Survivability by Class', 'Socio-Economic Status', 'Distribution')
 fig.savefig(fig_prefix+'survivability_by_class')
 
 
@@ -355,7 +370,7 @@ fig.savefig(fig_prefix+'survivability_by_class')
 # ### Survivability by Sex in each Class
 # Using the two graphs before, let's look at the survivability by gender in each class.
 
-# In[26]:
+# In[73]:
 
 # Looking into survivability by Class
 fig = plt.figure(figsize=(10,6))
@@ -363,11 +378,7 @@ ax = fig.add_subplot(111)
 ax = sns.barplot(x='Pclass', y='Survived', hue='Sex', data=titanic_df, estimator=np.sum, ci=0)
 
 # Plot Customizations
-ax.tick_params(labelsize=12)
-ax.set_xlabel('Socio-Economic Status', fontsize=13)
-ax.set_ylabel('No. of Survivors', fontsize=13)
-ax.set_title('Survivability by Sex in each Class', fontsize=14)
-
+plot_customize(ax, 'Survivability by Sex in each Class', 'Socio-Economic Status', 'No. of Survivors')
 fig.savefig(fig_prefix+'survivability_by_sex_and_class')
 
 
@@ -375,7 +386,7 @@ fig.savefig(fig_prefix+'survivability_by_sex_and_class')
 
 # ### Survivability by Age
 
-# In[27]:
+# In[77]:
 
 # Looking into the survivability distrubition by age
 fig = plt.figure(figsize=(13,7))
@@ -384,17 +395,13 @@ fig = plt.figure(figsize=(13,7))
 # For Survived
 ax1 = fig.add_subplot(211)
 ax1= sns.distplot(titanic_df[titanic_df['Survived']==1]['Filled Age'], label="Survived", color='g', bins=15)
-ax1.set_title('Distribution of Age (Survived)', fontsize=13)
-ax1.set_xlabel('Age', fontsize=12)
-ax1.set_ylabel('Density', fontsize=12)
+plot_customize(ax1, 'Distribution of Age (Survived)', 'Age', 'Density')
 ax1.set(xlim=(1,titanic_df['Filled Age'].max()))
 
 # For Not Survived
 ax2 = fig.add_subplot(212)
 ax2 = sns.distplot(titanic_df[titanic_df['Survived']==0]['Filled Age'], label="Not Survived", color='b', bins=15)
-ax2.set_title('Distribution of Age (Not Survived)', fontsize=13)
-ax2.set_xlabel('Age', fontsize=12)
-ax2.set_ylabel('Density', fontsize=12)
+plot_customize(ax2, 'Distribution of Age (Not Survived)', 'Age', 'Density')
 ax2.set(xlim=(1,titanic_df['Filled Age'].max()))
 
 plt.tight_layout()
@@ -407,7 +414,38 @@ fig.savefig(fig_prefix+'survivability_by_age')
 
 
 
-# In[ ]:
+# ## Rejected Ideas
+
+# In[84]:
+
+# NOT GONNA USE THIS
+# Below is better
+labels = ['Not Survived', 'Survived']
+colors = ['#03A9F4', '#4CAF50']
+explode = (0.08, 0)
+
+fig = plt.figure(figsize=(16,7))
+fig.suptitle('Survival by Gender', fontsize=16)
+
+ax1 = fig.add_subplot(121)
+ax2 = fig.add_subplot(122)
+
+ax1.set_xlabel('Female', fontsize=14)
+patches, texts, autotexts = ax1.pie(grouped_by_sex_survival.ix['Female'], labels = labels, autopct='%.0f%%', 
+        explode=explode, shadow=True, colors=colors)
+texts[0].set_fontsize(13)
+texts[1].set_fontsize(13)
+
+ax2.set_xlabel('Male', fontsize=14)
+patches, texts, autotexts = ax2.pie(grouped_by_sex_survival.ix['Male'], labels = labels, autopct='%.0f%%', 
+        explode=explode, shadow=True, colors=colors, startangle=-110)
+texts[0].set_fontsize(13)
+texts[1].set_fontsize(13)
 
 
-
+#     Scratch: Thinking of just finding the median age by sex and putting the median age on the missing values. BUT! Why not try extracting the title of the name (i.e. Mr., Mrs, etc) and then find the median age based on the sex and the title.
+#     
+#     Steps:
+#     1. Split surname by using , as delimiter
+#     2. Create a list of titles from the data
+#     3. Unify these titles
