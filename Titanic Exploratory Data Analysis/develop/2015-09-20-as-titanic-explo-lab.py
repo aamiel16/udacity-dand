@@ -107,7 +107,7 @@ titanic_df.head()
 # ### Counting the NaN Entries by Column
 # Upon looking at the data, I observed that some rows have no entries under the Age and Cabin column. Is there other columns with missing values? In order to explore the data even further, I looked at each column and check the number of NaN entries in that column.
 
-# In[10]:
+# In[8]:
 
 # Counts the number of NaN or null entries in each column
 titanic_df.isnull().sum()
@@ -124,9 +124,9 @@ titanic_df.isnull().sum()
 # In filling up the missing age, I could have gotten the median age by sex, and just subtitute this median age for every missing value based on the sex of that row. But, I have observed from the data that the title of names (i.e. Mr, Ms, Master, etc.) could also have something to do with age, especially that the title `Master` seemed to be associated with children. Hence, I decided to use these title, in order to predict or fill the missing age.
 
 # ### Splitting the `Name` Column
-# Using the `Name` column of the data frame, I would split the passenger's name and add three additional columns: `Title`, `Firstname`, `Surname` the name's title, first name, and surname, respectively.
+# Using the `Name` column of the data frame, I would split the passenger's name and add three additional columns: `Title`, `Firstname`, `Surname` for the name's title, first name, and surname, respectively.
 
-# In[11]:
+# In[9]:
 
 # Splitting the surname from the rest of the name
 s_surname = titanic_df['Name'].str.split(',', expand=True)
@@ -145,7 +145,7 @@ s_title = s_title.rename('Title')
 s_surname = s_surname.rename('Surname')
 
 
-# In[12]:
+# In[10]:
 
 # Adding the name sections to the data frame
 titanic_df = titanic_df.join([s_title, s_firstname, s_surname])
@@ -155,19 +155,19 @@ titanic_df = titanic_df.join([s_title, s_firstname, s_surname])
 
 # Now that the additional columns have been added, I then would like to look at the different titles that I would be working with. Upon looking at the different titles, I decided to unify some of the titles in order to fill the missing ages according to the passenger's title.
 
-# In[14]:
+# In[11]:
 
 # Looking at the different titles in the Data
 titanic_df['Title'].unique()
 
 
-# In[15]:
+# In[12]:
 
 # Looking at the different titles with missing ages
 titanic_df[titanic_df['Age'].isnull()]['Title'].unique()
 
 
-# In[16]:
+# In[13]:
 
 # Function that would unify or organize the title based on the titles with missing ages
 def unify_title(df):
@@ -184,12 +184,12 @@ def unify_title(df):
         return df
 
 
-# In[17]:
+# In[14]:
 
 titanic_df['UniTitle'] = titanic_df['Title'].apply(unify_title)
 
 
-# In[13]:
+# In[34]:
 
 # Confirming that the columns have been added
 titanic_df.head()
@@ -201,7 +201,7 @@ titanic_df.head()
 
 # #### Looking for outliers in the Age of each Unified Title
 
-# In[18]:
+# In[16]:
 
 # Plotting the box plot per Unititle
 fig = plt.figure(figsize=(10,6))
@@ -221,14 +221,14 @@ fig.savefig(fig_prefix+'box_plot_ages_by_title')
 
 # #### Creating and filling the `Filled Age` column
 
-# In[19]:
+# In[17]:
 
 # Creating a series that contains the median age for each title
 median_age_by_title = titanic_df.groupby('UniTitle').median().round(2)['Age']
 median_age_by_title
 
 
-# In[20]:
+# In[18]:
 
 # Creating the new column that would contain the complete age data
 titanic_df['Filled Age'] = titanic_df['Age']   
@@ -239,7 +239,7 @@ for i in range(len(titanic_df)):
         titanic_df.loc[i, 'Filled Age'] = median_age_by_title.loc[titanic_df.loc[i, 'UniTitle']]
 
 
-# In[21]:
+# In[19]:
 
 # Looking at the new data frame
 titanic_df[titanic_df['Age'].isnull()][['Age', 'UniTitle', 'Filled Age']].head()
@@ -247,7 +247,7 @@ titanic_df[titanic_df['Age'].isnull()][['Age', 'UniTitle', 'Filled Age']].head()
 
 # > **Note: ** We could see that for every NaN values, we have successfully filled it based on the person's title
 
-# In[22]:
+# In[20]:
 
 # Visualizing the two distributions
 fig = plt.figure(figsize=(10,6))
@@ -268,7 +268,7 @@ plt.savefig(fig_prefix+'distribution_age_and_fill_age')
 
 # ### Another look into the missing `Age` values
 
-# In[23]:
+# In[21]:
 
 # Missing Age Values by Gender
 print (titanic_df[titanic_df['Age'].isnull()]['Sex']=='Male').sum()   # Number of missing age values from male
@@ -291,7 +291,7 @@ print (titanic_df[titanic_df['Age'].isnull()]['Sex']=='Female').sum() # Number o
 
 # ### How many female passengers and male passengers survived?
 
-# In[8]:
+# In[22]:
 
 grouped_by_sex_survival = pd.DataFrame(titanic_df.groupby(['Sex', 'Survived'], as_index=True).count()['PassengerId'])
 grouped_by_sex_survival.columns = ['Count']
@@ -299,7 +299,7 @@ grouped_by_sex_survival.index.set_levels(['Not Survived', 'Survived'], level=1, 
 grouped_by_sex_survival
 
 
-# In[83]:
+# In[23]:
 
 fig = plt.figure(figsize=(14,6))
 ax1 = fig.add_subplot(121)
@@ -321,7 +321,7 @@ fig.savefig(fig_prefix+'pie_survival_each_gender')
 
 # ## 2.1 Data Visualization
 
-# In[71]:
+# In[24]:
 
 def plot_customize(ax, title, xlabel, ylabel):
     ax.tick_params(labelsize=12)
@@ -335,7 +335,7 @@ def plot_customize(ax, title, xlabel, ylabel):
 # ### Survivability by Sex
 # As per reports, most of the 700 survivors of Titanic are female, and children. I wanted to confirm this by looking into visualizations of the data.
 
-# In[68]:
+# In[25]:
 
 # Looking into survivability by sex
 fig = plt.figure(figsize=(6,6))
@@ -352,7 +352,7 @@ fig.savefig(fig_prefix+'survivability_by_sex')
 # ### Survivability by Class
 # Looking at a passenger's socio-economic status and survivability.
 
-# In[72]:
+# In[26]:
 
 # Looking into survivability by Class
 fig = plt.figure(figsize=(6,6))
@@ -370,7 +370,7 @@ fig.savefig(fig_prefix+'survivability_by_class')
 # ### Survivability by Sex in each Class
 # Using the two graphs before, let's look at the survivability by gender in each class.
 
-# In[73]:
+# In[27]:
 
 # Looking into survivability by Class
 fig = plt.figure(figsize=(10,6))
@@ -386,7 +386,7 @@ fig.savefig(fig_prefix+'survivability_by_sex_and_class')
 
 # ### Survivability by Age
 
-# In[77]:
+# In[28]:
 
 # Looking into the survivability distrubition by age
 fig = plt.figure(figsize=(13,7))
@@ -416,7 +416,7 @@ fig.savefig(fig_prefix+'survivability_by_age')
 
 # ## Rejected Ideas
 
-# In[84]:
+# In[29]:
 
 # NOT GONNA USE THIS
 # Below is better
