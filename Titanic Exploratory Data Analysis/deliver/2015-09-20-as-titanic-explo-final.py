@@ -45,7 +45,7 @@
 
 # ### Imports and Loading the Data 
 
-# In[841]:
+# In[1]:
 
 # Imports
 import pandas as pd
@@ -57,10 +57,10 @@ import seaborn as sns
 get_ipython().magic('matplotlib inline')
 
 # Figure Prefix
-fig_prefix = '../figures/2015-09-20-as-titanic-explo-lab-' 
+fig_prefix = '../figures/final/2015-09-20-as-titanic-explo-final-' 
 
 
-# In[842]:
+# In[2]:
 
 # Getting the titanic data
 titanic_df = pd.read_csv('../data/titanic_data.csv')
@@ -68,7 +68,7 @@ titanic_df = pd.read_csv('../data/titanic_data.csv')
 
 # ### Some information about the data
 
-# In[843]:
+# In[3]:
 
 # Some information about the data
 titanic_df.info()
@@ -76,7 +76,7 @@ titanic_df.info()
 
 # >**Analysis: **From here we can see that there are about **891 entries** with a total of **12 columns**. The data types for each column can be observed as well. The variable descriptions as obtained from Kaggle is showed from this text file *[data_descriptions.txt](../data/data_descriptions.txt)*.
 
-# In[844]:
+# In[4]:
 
 # Looking at some entries of the data
 titanic_df.head()
@@ -90,7 +90,7 @@ titanic_df.head()
 # ### Cleaning the Pclass, Sex, and Embarked Columns
 # For the `Pclass` column, I would put the respective socio-economic status value for each numeric value *(1= Upper Class, 2 = Middle Class, 3 = Lower Class)*. Meanwhile, for the `Sex` column, I would just capitalize each word of the gender. And finally, for the `Embarked` column, I would put the respective embark locations *(C = Cherbourg; Q = Queenstown; S = Southampton)*.
 
-# In[845]:
+# In[5]:
 
 # Functions to clean data
 def clean_pclass(df_col):
@@ -115,12 +115,12 @@ def clean_data(df):
     return df
 
 
-# In[846]:
+# In[6]:
 
 titanic_df = clean_data(titanic_df)
 
 
-# In[847]:
+# In[7]:
 
 # Looking at the cleaned data
 titanic_df.head()
@@ -133,7 +133,7 @@ titanic_df.head()
 
 # #### Counting the `NaN` entries per column
 
-# In[848]:
+# In[8]:
 
 # Counts the number of NaN or null entries in each column
 titanic_df.isnull().sum()
@@ -154,7 +154,7 @@ titanic_df.isnull().sum()
 # 
 # Using the `Name` column of the data frame, I would split the passenger's name and add three additional columns: `Title`, `Firstname`, `Surname` for the name's title, first name, and surname, respectively.
 
-# In[849]:
+# In[9]:
 
 # Splitting the surname from the rest of the name
 s_surname = titanic_df['Name'].str.split(',', expand=True)
@@ -173,7 +173,7 @@ s_title = s_title.rename('Title')
 s_surname = s_surname.rename('Surname')
 
 
-# In[850]:
+# In[10]:
 
 # Adding the name sections to the data frame
 titanic_df = titanic_df.join([s_title, s_firstname, s_surname])
@@ -183,19 +183,19 @@ titanic_df = titanic_df.join([s_title, s_firstname, s_surname])
 
 # Now that the additional columns have been added, I then would like to look at the different titles that I would be working with. Upon looking at the different titles, I decided to unify some of the titles in order to fill the missing ages according to the passenger's title.
 
-# In[851]:
+# In[11]:
 
 # Looking at the different titles in the Data
 titanic_df['Title'].unique()
 
 
-# In[852]:
+# In[12]:
 
 # Looking at the different titles with missing ages
 titanic_df[titanic_df['Age'].isnull()]['Title'].unique()
 
 
-# In[853]:
+# In[13]:
 
 # Function that would unify or organize the title based on the titles with missing ages
 def unify_title(df):
@@ -212,13 +212,13 @@ def unify_title(df):
         return df
 
 
-# In[854]:
+# In[14]:
 
 # Adding a new column for the unified title
 titanic_df['UniTitle'] = titanic_df['Title'].apply(unify_title)
 
 
-# In[855]:
+# In[15]:
 
 # Confirming that the columns have been added
 titanic_df.head()
@@ -230,7 +230,7 @@ titanic_df.head()
 
 # #### Looking for outliers in the Age of each Unified Title
 
-# In[856]:
+# In[16]:
 
 # Plotting the box plot per Unititle
 fig = plt.figure(figsize=(12,6))
@@ -251,14 +251,14 @@ fig.savefig(fig_prefix+'box_plot_ages_by_title')
 
 # #### Creating and filling the Filled Age Column
 
-# In[857]:
+# In[17]:
 
 # Creating a series that contains the median age for each title
 median_age_by_title = titanic_df.groupby('UniTitle').median().round(2)['Age']
 median_age_by_title
 
 
-# In[858]:
+# In[18]:
 
 # Creating the new column that would contain the complete age data
 titanic_df['Filled Age'] = titanic_df['Age']
@@ -270,7 +270,7 @@ for i in range(len(titanic_df)):
         titanic_df.loc[i, 'Filled Age'] = median_age_by_title.loc[titanic_df.loc[i, 'UniTitle']]
 
 
-# In[859]:
+# In[19]:
 
 # Looking at the filled values
 # Just remove .head() to see every missing age and the corresponding filled age
@@ -289,7 +289,7 @@ titanic_df[titanic_df['Age'].isnull()][['Age', 'UniTitle', 'Filled Age']].head()
 # In this part, I would go through some analysis and visualizations about the data. Questions would be posed by the start of each part, and then answered by exploring the data and using some visualizations.
 # 
 
-# In[860]:
+# In[20]:
 
 # Function used to customize the figures or visualizations
 def plot_customize(ax, title=None, xlabel=None, ylabel=None):
@@ -316,13 +316,13 @@ def plot_customize(ax, title=None, xlabel=None, ylabel=None):
 # ### Are all passengers that have missing values under the Cabin column, didn't survived? If not, how many did survived?
 # One possible explanation on why these values were missing was that the passengers didn't survived. Hence, lets take a look if this can be seen in the data.
 
-# In[910]:
+# In[21]:
 
 # This dataframe would contain the data of every rows with missing cabin values
 missing_cabin = titanic_df[titanic_df['Cabin'].isnull()]
 
 
-# In[929]:
+# In[22]:
 
 print missing_cabin.groupby('Survived').count()['PassengerId']
 # Plotting 
@@ -342,7 +342,7 @@ fig.savefig(fig_prefix+'dist_of_survivability_miss_cab_val')
 
 # ### What gender have the most missing values under the Cabin column?
 
-# In[942]:
+# In[23]:
 
 print missing_cabin.groupby('Sex').count()['PassengerId']
 
@@ -358,7 +358,7 @@ plt.savefig(fig_prefix+'pie_miss_cab_by_gender')
 
 # ### What class/socio-economic status have the most missing values under the Cabin column?
 
-# In[965]:
+# In[24]:
 
 miss_cab_grouped_by_pclass = missing_cabin.groupby('Pclass', as_index=False).count()
 
@@ -383,7 +383,7 @@ fig.savefig(fig_prefix+'dist_miss_cab_by_pclass')
 
 # ### How many passengers survived and did not survived?
 
-# In[861]:
+# In[25]:
 
 # Looking into how many passengers survived and did not survived
 grouped_by_survived = titanic_df.groupby(['Survived'], as_index=True).count()['PassengerId']
@@ -395,7 +395,7 @@ grouped_by_survived
 
 # #### Visualizing the Division of Passengers who Survived and Did Not Survived
 
-# In[862]:
+# In[26]:
 
 fig = plt.figure(figsize=(7,7))
 ax = fig.add_subplot(111)
@@ -425,7 +425,7 @@ fig.savefig(fig_prefix+'passenger_comp_by_survived')
 
 # ### How many of the passengers are male? Female?
 
-# In[863]:
+# In[27]:
 
 grouped_by_sex = titanic_df.groupby(['Sex'], as_index=True).count()['PassengerId']
 grouped_by_sex
@@ -435,7 +435,7 @@ grouped_by_sex
 
 # #### Visualizing the Passenger Composition by Gender
 
-# In[864]:
+# In[28]:
 
 fig = plt.figure(figsize=(7,7))
 ax = fig.add_subplot(111)
@@ -457,7 +457,7 @@ fig.savefig(fig_prefix+'passenger_comp_by_sex')
 # ### How many survived and did not survived from each gender?
 # We were able to look at the composition of passengers by gender. But, how many from each gender have survived? That didn't survived?
 
-# In[865]:
+# In[29]:
 
 # Creating a dataframe that would summarize the survival rate from each gender
 grouped_by_sex_survival = pd.DataFrame(titanic_df.groupby(['Sex', 'Survived'], as_index=True).count()['PassengerId'])
@@ -470,7 +470,7 @@ grouped_by_sex_survival
 
 # #### Visualizing the Survivability by Gender
 
-# In[866]:
+# In[30]:
 
 # Visualizing Survivability by Gender
 fig = plt.figure(figsize=(12,6))
@@ -500,7 +500,7 @@ fig.savefig(fig_prefix+'survival_by_each_gender')
 # ### Does a passenger's gender affect his/her survivability?
 # From the figures above, it begs to question that: 'Does a passenger's gender has something to with his/her survivability?'
 
-# In[867]:
+# In[31]:
 
 # Looking into survivability by sex
 fig = plt.figure(figsize=(6,6))
@@ -525,7 +525,7 @@ fig.savefig(fig_prefix+'dist_survivors_by_sex')
 
 # ### How many of the passengers are upper class, middle class, and lower class?
 
-# In[868]:
+# In[32]:
 
 grouped_by_pclass = titanic_df.groupby(['Pclass'], as_index=True).count()['PassengerId']
 grouped_by_pclass
@@ -533,7 +533,7 @@ grouped_by_pclass
 
 # #### Visualizing the Passenger Composition by Class
 
-# In[869]:
+# In[33]:
 
 fig = plt.figure(figsize=(7,7))
 ax = fig.add_subplot(111)
@@ -553,7 +553,7 @@ fig.savefig(fig_prefix+'passenger_comp_by_pclass')
 
 # ### How many survived and did not survived from each class?
 
-# In[870]:
+# In[34]:
 
 # Looking into how many survived and did not survived in each class
 grouped_by_status_survival = titanic_df.groupby(['Pclass', 'Survived'], as_index=False).count()
@@ -565,7 +565,7 @@ grouped_by_status_survival
 
 # #### Visualizing the Survivability by Gender
 
-# In[871]:
+# In[35]:
 
 # Looking into survivability from each class
 fig = plt.figure(figsize=(12,6))
@@ -589,7 +589,7 @@ fig.savefig(fig_prefix+'dist_survivability_by_pclass')
 # ### Does the socio-economic satus of a person affects his/her survivability?
 # Looking a lot closer into each socio-economic status and the number of survivors.
 
-# In[872]:
+# In[36]:
 
 # Looking into survivability by Class
 fig = plt.figure(figsize=(6,6))
@@ -609,7 +609,7 @@ fig.savefig(fig_prefix+'survivors_by_pclass')
 # ### Survivability by Gender in each Class
 # Earlier we saw that majority of the survivors were female. Does that mean that for all three class, female passengers were likely to have survived than male passengers?
 
-# In[873]:
+# In[37]:
 
 # Looking into survivability by Class
 fig = plt.figure(figsize=(12,6))
@@ -641,7 +641,7 @@ fig.savefig(fig_prefix+'survivability_by_sex_and_class')
 # ### Looking into the Distribution of Age and Filled Age Column
 # Since the `Age` Column was missing some values, the `Filled Age` Column was added. And in order to fill in the missing age values, the median for each `UniTitle` was obtained and was used to fill the missing age values. So, what does the distribution looks like before and after filling the missing age values?
 
-# In[874]:
+# In[38]:
 
 # Visualizing the two distributions
 fig = plt.figure(figsize=(12,6))
@@ -662,7 +662,7 @@ fig.savefig(fig_prefix+'distribution_age_and_fill_age')
 
 # ### Is the majority of missing age values are male?
 
-# In[875]:
+# In[39]:
 
 # Missing Age Values by Gender
 # This just gets the entries that have null entries, then group them by gender, and then count each Id for that gender
@@ -683,7 +683,7 @@ plot_customize(ax, title='Gender of Missing Age Values')
 # ### Looking into the Distribution of Age by Survival
 # Let's look at the age distribution between those who survived, and those who didn't. What does the distribution of age of those who survived looks like? How about the age distribution of those who didn't survived?
 
-# In[876]:
+# In[40]:
 
 # Plotting
 g = sns.FacetGrid(titanic_df, row="Survived", hue='Survived', 
@@ -708,7 +708,7 @@ fig.savefig(fig_prefix+'survivability_by_age')
 
 # #### Adding the Age Category column and Categorizing the Passengers
 
-# In[877]:
+# In[41]:
 
 # Function to Categorize Passengers by Age
 def categorize_by_age(df):
@@ -724,7 +724,7 @@ def categorize_by_age(df):
     return df
 
 
-# In[878]:
+# In[42]:
 
 # Categorizing each passenger by age
 titanic_df = titanic_df.apply(categorize_by_age, axis=1)
@@ -732,7 +732,7 @@ titanic_df = titanic_df.apply(categorize_by_age, axis=1)
 
 # ### How many of the passengers can be considered as a man, a woman, and a child?
 
-# In[967]:
+# In[43]:
 
 grouped_by_age_cat = titanic_df.groupby('Age Category').count()['PassengerId']
 print grouped_by_age_cat
@@ -752,7 +752,7 @@ plt.savefig(fig_prefix+'passenger_comp_by_age_cat')
 
 # ### What were the survivability from each age category?
 
-# In[880]:
+# In[44]:
 
 # Plotting the survivability by age category
 fig = plt.figure(figsize=(12,6))
@@ -780,7 +780,7 @@ fig.savefig(fig_prefix+'survivability_by_age_cat')
 
 # ### How many passengers embarked at Southampton, Cherbourg, and Queenstown?
 
-# In[881]:
+# In[45]:
 
 grouped_by_embark = titanic_df.groupby('Embarked').count()['PassengerId']
 grouped_by_embark
@@ -788,7 +788,7 @@ grouped_by_embark
 
 # #### Visualizing the Passenger Composition based on Embarked Location
 
-# In[882]:
+# In[46]:
 
 # Plotting the passenger composition by embarked location
 fig = plt.figure(figsize=(10,6))
@@ -809,7 +809,7 @@ plt.savefig(fig_prefix+'passenger_comp_by_embark')
 
 # ### How many survived and didn't survived from each embarkment location?
 
-# In[883]:
+# In[47]:
 
 grouped_by_embark_survival = titanic_df.groupby(['Embarked', 'Survived']).count()['PassengerId']
 print grouped_by_embark_survival
@@ -830,7 +830,7 @@ fig.savefig(fig_prefix+'survivability_by_embark')
 
 # ### Distribution of Class and Age Category from each Embarkment Location
 
-# In[884]:
+# In[48]:
 
 g = sns.factorplot(x='PassengerId', y='Pclass', data=titanic_df,
                    hue='Age Category', row='Embarked', order=['Lower Class', 'Middle Class',  'Upper Class'],
@@ -859,7 +859,7 @@ g.savefig(fig_prefix+'dist_class_agecat_by_embark')
 
 # #### Creating the Family Size Column
 
-# In[885]:
+# In[49]:
 
 # Creating a function that would add up the Parch and SibSp, then store the sum in the Family Size column
 def get_family_size(df):
@@ -868,14 +868,14 @@ def get_family_size(df):
     return df
 
 
-# In[886]:
+# In[50]:
 
 titanic_df = titanic_df.apply(get_family_size, axis=1)
 
 
 # ### What does the distribution of family size looks like?
 
-# In[887]:
+# In[51]:
 
 # Plotting the distribution of family size
 fig = plt.figure(figsize=(12,6))
@@ -895,7 +895,7 @@ fig.savefig(fig_prefix+'dist_family_size')
 
 # #### Creating the Family Status Column
 
-# In[888]:
+# In[52]:
 
 # A function that would create the Family Status Column
 def get_family_stat(df):
@@ -907,14 +907,14 @@ def get_family_stat(df):
     return df
 
 
-# In[889]:
+# In[53]:
 
 titanic_df = titanic_df.apply(get_family_stat, axis=1)
 
 
 # #### Visualizing the Survival by Family Status
 
-# In[908]:
+# In[54]:
 
 # Plotting
 fig = plt.figure(figsize=(12,6))
@@ -957,103 +957,3 @@ ax.legend(loc='best', fontsize=11)
 #  https://stanford.edu/~mwaskom/software/seaborn/tutorial/categorical.html
 
 # <a href=#sections><center> Back to Sections </center></a>
-
-# ## Rejected Ideas
-
-# In[891]:
-
-# NOT GONNA USE THIS
-# Below is better
-labels = ['Not Survived', 'Survived']
-colors = ['#03A9F4', '#4CAF50']
-explode = (0.08, 0)
-
-fig = plt.figure(figsize=(16,7))
-fig.suptitle('Survival by Gender', fontsize=16)
-
-ax1 = fig.add_subplot(121)
-ax2 = fig.add_subplot(122)
-
-ax1.set_xlabel('Female', fontsize=14)
-patches, texts, autotexts = ax1.pie(grouped_by_sex_survival.ix['Female'], labels = labels, autopct='%.0f%%', 
-        explode=explode, shadow=True, colors=colors)
-texts[0].set_fontsize(13)
-texts[1].set_fontsize(13)
-
-ax2.set_xlabel('Male', fontsize=14)
-patches, texts, autotexts = ax2.pie(grouped_by_sex_survival.ix['Male'], labels = labels, autopct='%.0f%%', 
-        explode=explode, shadow=True, colors=colors, startangle=-110)
-texts[0].set_fontsize(13)
-texts[1].set_fontsize(13)
-
-
-#     Scratch: Thinking of just finding the median age by sex and putting the median age on the missing values. BUT! Why not try extracting the title of the name (i.e. Mr., Mrs, etc) and then find the median age based on the sex and the title.
-#     
-#     Steps:
-#     1. Split surname by using , as delimiter
-#     2. Create a list of titles from the data
-#     3. Unify these titles
-
-# In[892]:
-
-# Looking into the survivability distrubition by age
-fig = plt.figure(figsize=(13,7))
-
-# Plotting the distribution
-# For Survived
-ax1 = fig.add_subplot(211)
-ax1= sns.distplot(titanic_df[titanic_df['Survived']==1]['Filled Age'], label="Survived", color='g', bins=20)
-plot_customize(ax1, 'Distribution of Age (Survived)', 'Age', 'Density')
-ax1.set(xlim=(1,titanic_df['Filled Age'].max()))
-
-# For Not Survived
-ax2 = fig.add_subplot(212)
-ax2 = sns.distplot(titanic_df[titanic_df['Survived']==0]['Filled Age'], label="Not Survived", color='b', bins=20)
-plot_customize(ax2, 'Distribution of Age (Not Survived)', 'Age', 'Density')
-ax2.set(xlim=(1,titanic_df['Filled Age'].max()))
-
-plt.tight_layout()
-
-
-
-# In[893]:
-
-a=None
-print a==None
-
-
-# In[ ]:
-
-
-
-
-# In[894]:
-
-sns.jointplot(x='Filled Age', y='Fare', data=titanic_df)
-
-
-# In[895]:
-
-len(titanic_df[titanic_df['Age']<16])
-
-
-# In[896]:
-
-titanic_df
-
-
-# In[897]:
-
-test_df['Cat'] = test_df['Pclass'].astype('category')
-type(test_df.groupby)
-
-
-# In[898]:
-
-titanic_df.groupby('Pclass').sum()['PassengerId'].plot.bar()
-
-
-# In[ ]:
-
-
-
