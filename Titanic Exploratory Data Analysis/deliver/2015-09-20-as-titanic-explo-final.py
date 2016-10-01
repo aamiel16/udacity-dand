@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# # Titanic Exploratory Data Analysis
+# # Titanic: Investigating a Data Set
 # 
 # ### Author: Adrian Amiel Sanchez
 
@@ -308,7 +308,7 @@ def plot_customize(ax, title=None, xlabel=None, ylabel=None):
 # <a id='section2.1' />  
 
 # ## 2.1 Looking into the Cabin Column
-# A lot of the values under the Cabin column was missing, and from this I was unable to fill the missing values. In this part, we are going to look at the missing values under the Cabin column, and determine a possible reason behind this. In this part, we are going to answer the following questions:
+# A lot of the values under the Cabin column was missing, and from this I was unable to fill the missing values. In this part, we are going to look at the missing values under the Cabin column, and determine a possible reason behind this. We are also going to answer the following questions:
 #    - Are all passengers that have missing values under the Cabin column, didn't survived? If not, how many did survived?
 #    - What gender have the most missing values under the Cabin column?
 #    - What class/socio-economic status have the most missing values under the Cabin column?
