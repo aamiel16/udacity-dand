@@ -80,21 +80,21 @@ get_ipython().magic("sql SELECT Title FROM Employee WHERE LastName = 'Johnson'")
 
 # ### Top 10 Composers with the most Songs
 
-# In[14]:
+# In[10]:
 
 get_ipython().run_cell_magic('sql', '', 'SELECT Composer, COUNT(*)\nFROM Track\nGROUP BY Composer\nORDER BY COUNT(*) DESC\nLIMIT 10;')
 
 
 # ### Tracks in the dataset that are between 2,500,000 and 2,600,000 milliseconds long?
 
-# In[18]:
+# In[11]:
 
 get_ipython().run_cell_magic('sql', '', 'SELECT Name, Milliseconds\nFROM Track\nWHERE Milliseconds>=2500000 AND Milliseconds<=2600000\nORDER BY Milliseconds')
 
 
 # ### List Albums either written by Iron Maiden or Amy Winehouse
 
-# In[30]:
+# In[12]:
 
 get_ipython().run_cell_magic('sql', '', "SELECT Ar.Name, Al.Title\nFROM Album as Al\nJOIN Artist as Ar\nON Ar.ArtistId = Al.ArtistId\nWHERE Ar.Name='Iron Maiden'\nOR Ar.Name='Amy Winehouse'")
 
@@ -103,7 +103,7 @@ get_ipython().run_cell_magic('sql', '', "SELECT Ar.Name, Al.Title\nFROM Album as
 
 # ### Top 3 countries with the highest number of invoices
 
-# In[38]:
+# In[13]:
 
 get_ipython().run_cell_magic('sql', '', 'SELECT BillingCountry, COUNT(*)\nFROM Invoice\nGROUP BY BillingCountry\nORDER BY COUNT(*) DESC\nLIMIT 3')
 
@@ -111,7 +111,7 @@ get_ipython().run_cell_magic('sql', '', 'SELECT BillingCountry, COUNT(*)\nFROM I
 # ### Highest paying customer
 # Build a query that returns the person who has the highest sum of all invoices, along with their email, first name, and last name.
 
-# In[46]:
+# In[14]:
 
 get_ipython().run_cell_magic('sql', '', 'SELECT Customer.FirstName, Customer.LastName, Customer.Email, SUM(Invoice.Total) as Total\nFROM Customer\nJOIN Invoice\nON Customer.CustomerId = Invoice.CustomerId\nGROUP BY Customer.CustomerId\nORDER BY Total DESC\nLIMIT 1')
 
@@ -123,7 +123,7 @@ get_ipython().run_cell_magic('sql', '', 'SELECT Customer.FirstName, Customer.Las
 # 
 # Can you find a way to deal with duplicate email addresses so no one receives multiple emails?
 
-# In[53]:
+# In[15]:
 
 get_ipython().run_cell_magic('sql', '', "SELECT Customer.Email, Customer.FirstName, Customer.LastName, Genre.Name\nFROM Customer\nJOIN Invoice ON Customer.CustomerId = Invoice.CustomerId\nJOIN InvoiceLine ON Invoice.InvoiceId = InvoiceLine.InvoiceId\nJOIN Track ON InvoiceLine.TrackId = Track.TrackId\nJOIN Genre ON Track.GenreId = Genre.GenreId\nWHERE Genre.Name = 'Rock'\nGROUP BY Customer.Email\nORDER BY Customer.Email ASC")
 
@@ -133,7 +133,7 @@ get_ipython().run_cell_magic('sql', '', "SELECT Customer.Email, Customer.FirstNa
 # 
 # Return both the city name and the sum of all invoice totals.
 
-# In[84]:
+# In[16]:
 
 get_ipython().run_cell_magic('sql', '', 'SELECT Invoice.BillingCity, SUM(Invoice.Total)\nFROM Invoice\nGROUP BY Invoice.BillingCity\nORDER BY SUM(Invoice.Total) DESC\nLIMIT 1')
 
@@ -142,14 +142,31 @@ get_ipython().run_cell_magic('sql', '', 'SELECT Invoice.BillingCity, SUM(Invoice
 # 
 # Return the top 3 most popular music genres for the city with the highest invoice total (you found this in the previous quiz!)
 
-# In[91]:
+# In[17]:
 
 get_ipython().run_cell_magic('sql', '', "SELECT Invoice.BillingCity, SUM(Invoice.Total), Genre.Name\nFROM Invoice\nJOIN InvoiceLine ON Invoice.InvoiceId = InvoiceLine.InvoiceId\nJOIN Track ON Track.TrackId = InvoiceLine.TrackId\nJOIN Genre ON Genre.GenreId = Track.GenreId\nWHERE Invoice.BillingCity = 'Prague'\nGROUP BY Genre.Name\nORDER BY SUM(Invoice.Total) DESC\nLIMIT 3")
 
 
-# In[93]:
+# In[27]:
 
-get_ipython().run_cell_magic('sql', '', 'SELECT Invoice.BillingCity, Count(Invoice.Total), Genre.Name\nFROM Invoice\nJOIN InvoiceLine ON Invoice.InvoiceId = InvoiceLine.InvoiceId\nJOIN Track ON Track.TrackId = InvoiceLine.TrackId\nJOIN Genre ON Genre.GenreId = Track.GenreId\nWHERE Invoice.BillingCity IN (SELECT Invoice.BillingCity\n                                FROM Invoice\n                                GROUP BY Invoice.BillingCity\n                                ORDER BY SUM(Invoice.Total) DESC\n                                LIMIT 1)\nGROUP BY Genre.Name\nORDER BY SUM(Invoice.Total) DESC\nLIMIT 3\n\n')
+get_ipython().run_cell_magic('sql', '', 'SELECT Invoice.BillingCity, Count(Invoice.Total), Genre.Name\nFROM Invoice\nJOIN InvoiceLine ON Invoice.InvoiceId = InvoiceLine.InvoiceId\nJOIN Track ON Track.TrackId = InvoiceLine.TrackId\nJOIN Genre ON Genre.GenreId = Track.GenreId\nWHERE Invoice.BillingCity = (SELECT Invoice.BillingCity\n                                FROM Invoice\n                                GROUP BY Invoice.BillingCity\n                                ORDER BY SUM(Invoice.Total) DESC\n                                LIMIT 1)\nGROUP BY Genre.Name\nORDER BY SUM(Invoice.Total) DESC\n')
+
+
+# ### Artist name and total track count of the top 10 rock bands. 
+
+# In[19]:
+
+get_ipython().run_cell_magic('sql', '', "SELECT Artist.Name, COUNT(Genre.Name)\nFROM Artist\nJOIN Album ON Album.ArtistId = Artist.ArtistId\nJOIN Track ON Track.AlbumId = Album.AlbumId\nJOIN Genre ON Genre.GenreId = Track.GenreId\nWHERE Genre.Name = 'Rock'\nGROUP BY Artist.Name\nORDER BY COUNT(Genre.Name) DESC\nLIMIT 10")
+
+
+# ### What does the alternative punk scene look like throughout French cities in your dataset?
+# Return the BillingCities in France, followed by the total number of tracks purchased for Alternative & Punk music.
+# 
+# Order your output so that the city with the highest total number of tracks purchased is on top.
+
+# In[20]:
+
+get_ipython().run_cell_magic('sql', '', "SELECT Invoice.BillingCity, COUNT(*)\nFROM Invoice\nJOIN InvoiceLine ON InvoiceLine.InvoiceId = Invoice.InvoiceId\nJOIN Track ON Track.TrackId = InvoiceLine.TrackId\nJOIN Genre ON Genre.GenreId = Track.GenreId\nWHERE Invoice.BillingCountry = 'France'\nAND Genre.Name = 'Alternative & Punk'\nGROUP BY BillingCity\nORDER BY COUNT(*) DESC")
 
 
 # In[ ]:
